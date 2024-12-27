@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function install() {
+    # Create and activate virtual environment if it doesn't exist
+    if [ ! -d "venv" ]; then
+        echo "Creating virtual environment..."
+        python3 -m venv venv
+    fi
+    
+    # Activate virtual environment
+    source venv/bin/activate
+    
+    # Install dependencies
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+}
+
+function up() {
+    # First run install
+    install
+    
+    # Start the web interface
+    python app.py
+}
+
+# Handle command
+case "$1" in
+    "up")
+        up
+        ;;
+    "install")
+        install
+        ;;
+    *)
+        echo "Usage: dev [up|install]"
+        exit 1
+        ;;
+esac 

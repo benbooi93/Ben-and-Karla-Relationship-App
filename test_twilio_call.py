@@ -2,40 +2,23 @@ import os
 from twilio.rest import Client
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
-def make_test_call(to_number):
-    """
-    Make a test call using Twilio
+def test_twilio_auth():
+    """Test Twilio authentication"""
+    load_dotenv()
     
-    Args:
-        to_number (str): The phone number to call (E.164 format)
-    """
+    api_key = os.getenv('TWILIO_API_KEY')
+    api_secret = os.getenv('TWILIO_API_SECRET')
+    account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+    
     try:
-        # Get credentials from environment variables
-        account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-        auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-        from_number = os.getenv('TWILIO_PHONE_NUMBER')
-        
-        # Initialize Twilio client
-        client = Client(account_sid, auth_token)
-        
-        # Make the call
-        call = client.calls.create(
-            url="http://demo.twilio.com/docs/voice.xml",
-            to=to_number,
-            from_=from_number
-        )
-        
-        print(f"Call initiated! SID: {call.sid}")
-        return call.sid
-        
+        client = Client(api_key, api_secret, account_sid)
+        # Try to list calls (this will verify auth)
+        calls = client.calls.list(limit=1)
+        print("✅ Twilio authentication successful!")
+        return True
     except Exception as e:
-        print(f"Error making call: {str(e)}")
-        return None
+        print(f"❌ Twilio authentication failed: {str(e)}")
+        return False
 
 if __name__ == "__main__":
-    # Example usage
-    test_number = "+16133168831"  # Replace with the number you want to test
-    make_test_call(test_number) 
+    test_twilio_auth() 

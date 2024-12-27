@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Phone Caller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Phone Caller</h1>
+    
+    <div id="form">
+        <div class="form-group">
+            <label for="phone">Phone Number (format: +1234567890):</label>
+            <input type="text" id="phone" name="phone">
+        </div>
+        
+        <div class="form-group">
+            <label for="objective">Call Objective:</label>
+            <textarea id="objective" name="objective" rows="4" placeholder="Example: Call and ask if they deliver pizza to Manitoba. If they don't deliver, thank them and end the call."></textarea>
+        </div>
+        
+        <button onclick="makeCall()">Make Call</button>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+        function makeCall() {
+            const phone = document.getElementById('phone').value;
+            const objective = document.getElementById('objective').value;
+            
+            if (!phone || !objective) {
+                document.getElementById('status').innerHTML = "Please fill in both fields";
+                return;
+            }
+            
+            document.getElementById('status').innerHTML = "Initiating call...";
+            
+            fetch('/make_call', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone, objective })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = data.message;
+                if (data.call_sid) {
+                    pollStatus(data.call_sid);
+                }
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = "Error: " + error.message;
+            });
+        }
+
+        function pollStatus(callSid) {
+            setInterval(() => {
+                fetch(`/check_status/${callSid}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('status').innerHTML += `<br>Status: ${data.status}`;
+                    });
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 
